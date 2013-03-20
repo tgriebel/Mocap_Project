@@ -1,0 +1,97 @@
+﻿Build started 3/20/2013 12:25:48 PM.
+     1>Project "C:\Users\Thomas\Dropbox\777--Animation\MocapViewer\MocapViewer.vcxproj" on node 2 (build target(s)).
+     1>InitializeBuildStatus:
+         Creating "Debug\MocapViewer.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       ClCompile:
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /I"C:\Program Files\boost_1_53_0\boost_1_53_0" /ZI /nologo /W3 /WX- /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt BVHParser.cpp Main.cpp
+         BVHParser.cpp
+     1>c:\users\thomas\dropbox\777--animation\mocapviewer\bvhparser.h(224): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\thomas\dropbox\777--animation\mocapviewer\bvhparser.h(241): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\thomas\dropbox\777--animation\mocapviewer\bvhparser.h(316): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\thomas\dropbox\777--animation\mocapviewer\bvhparser.h(350): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\thomas\dropbox\777--animation\mocapviewer\bvhparser.h(363): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\thomas\dropbox\777--animation\mocapviewer\bvhparser.h(367): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\thomas\dropbox\777--animation\mocapviewer\bvhparser.h(368): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\thomas\dropbox\777--animation\mocapviewer\bvhparser.h(369): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\thomas\dropbox\777--animation\mocapviewer\bvhparser.cpp(240): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\thomas\dropbox\777--animation\mocapviewer\quaternion.h(24): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+                 c:\users\thomas\dropbox\777--animation\mocapviewer\quaternion.h(16) : while compiling class template member function 'Quaternion<T>::Quaternion(T,vec3d &)'
+                 with
+                 [
+                     T=float
+                 ]
+                 c:\users\thomas\dropbox\777--animation\mocapviewer\bvhparser.h(283) : see reference to class template instantiation 'Quaternion<T>' being compiled
+                 with
+                 [
+                     T=float
+                 ]
+     1>c:\users\thomas\dropbox\777--animation\mocapviewer\quaternion.h(25): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\thomas\dropbox\777--animation\mocapviewer\quaternion.h(26): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\thomas\dropbox\777--animation\mocapviewer\quaternion.h(31): warning C4244: '=' : conversion from 'const double' to 'float', possible loss of data
+                 c:\users\thomas\dropbox\777--animation\mocapviewer\quaternion.h(30) : while compiling class template member function 'Quaternion<T>::Quaternion(const vec3d &)'
+                 with
+                 [
+                     T=float
+                 ]
+     1>c:\users\thomas\dropbox\777--animation\mocapviewer\quaternion.h(32): warning C4244: '=' : conversion from 'const double' to 'float', possible loss of data
+     1>c:\users\thomas\dropbox\777--animation\mocapviewer\quaternion.h(33): warning C4244: '=' : conversion from 'const double' to 'float', possible loss of data
+     1>c:\program files (x86)\microsoft visual studio 10.0\vc\include\xutility(2227): warning C4996: 'std::_Copy_impl': Function call with parameters that may be unsafe - this call relies on the caller to check that the passed values are correct. To disable this warning, use -D_SCL_SECURE_NO_WARNINGS. See documentation on how to use Visual C++ 'Checked Iterators'
+                 c:\program files (x86)\microsoft visual studio 10.0\vc\include\xutility(2212) : see declaration of 'std::_Copy_impl'
+                 c:\program files\boost_1_53_0\boost_1_53_0\boost\algorithm\string\detail\classification.hpp(102) : see reference to function template instantiation '_OutIt std::copy<const char*,char*>(_InIt,_InIt,_OutIt)' being compiled
+                 with
+                 [
+                     _OutIt=char *,
+                     _InIt=const char *
+                 ]
+                 c:\program files\boost_1_53_0\boost_1_53_0\boost\algorithm\string\classification.hpp(206) : see reference to function template instantiation 'boost::algorithm::detail::is_any_ofF<CharT>::is_any_ofF<boost::iterator_range<IteratorT>>(const RangeT &)' being compiled
+                 with
+                 [
+                     CharT=char,
+                     IteratorT=const char *,
+                     RangeT=boost::iterator_range<const char *>
+                 ]
+                 c:\users\thomas\dropbox\777--animation\mocapviewer\bvhparser.cpp(266) : see reference to function template instantiation 'boost::algorithm::detail::is_any_ofF<CharT> boost::algorithm::is_any_of<const char[3]>(RangeT (&))' being compiled
+                 with
+                 [
+                     CharT=char,
+                     RangeT=const char [3]
+                 ]
+         Generating Code...
+         Compiling...
+         Main.cpp
+     1>c:\users\thomas\dropbox\777--animation\mocapviewer\quaternion.h(9): warning C4005: 'PI' : macro redefinition
+                 c:\users\thomas\dropbox\777--animation\mocapviewer\freecamera.h(7) : see previous definition of 'PI'
+     1>c:\users\thomas\dropbox\777--animation\mocapviewer\bvhparser.h(224): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\thomas\dropbox\777--animation\mocapviewer\bvhparser.h(241): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\thomas\dropbox\777--animation\mocapviewer\bvhparser.h(316): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\thomas\dropbox\777--animation\mocapviewer\bvhparser.h(350): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\thomas\dropbox\777--animation\mocapviewer\bvhparser.h(363): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\thomas\dropbox\777--animation\mocapviewer\main.cpp(650): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\thomas\dropbox\777--animation\mocapviewer\main.cpp(930): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\thomas\dropbox\777--animation\mocapviewer\main.cpp(944): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\thomas\dropbox\777--animation\mocapviewer\main.cpp(950): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\thomas\dropbox\777--animation\mocapviewer\main.cpp(973): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\thomas\dropbox\777--animation\mocapviewer\main.cpp(996): warning C4018: '<' : signed/unsigned mismatch
+         Generating Code...
+       Link:
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Thomas\Dropbox\777--Animation\MocapViewer\Debug\MocapViewer.exe" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"Debug\MocapViewer.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"C:\Users\Thomas\Dropbox\777--Animation\MocapViewer\Debug\MocapViewer.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Thomas\Dropbox\777--Animation\MocapViewer\Debug\MocapViewer.lib" /MACHINE:X86 Debug\billboarding.obj
+         Debug\bitmap.obj
+         Debug\BVHParser.obj
+         Debug\Frame.obj
+         Debug\Frame2D.obj
+         Debug\FreeCamera.obj
+         Debug\Main.obj
+         Debug\Node.obj
+         Debug\Parser2.obj
+         LINK : C:\Users\Thomas\Dropbox\777--Animation\MocapViewer\Debug\MocapViewer.exe not found or not built by the last incremental link; performing full link
+         MocapViewer.vcxproj -> C:\Users\Thomas\Dropbox\777--Animation\MocapViewer\Debug\MocapViewer.exe
+       Manifest:
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /outputresource:"C:\Users\Thomas\Dropbox\777--Animation\MocapViewer\Debug\MocapViewer.exe;#1" /manifest Debug\MocapViewer.exe.intermediate.manifest
+       FinalizeBuildStatus:
+         Deleting file "Debug\MocapViewer.unsuccessfulbuild".
+         Touching "Debug\MocapViewer.lastbuildstate".
+     1>Done Building Project "C:\Users\Thomas\Dropbox\777--Animation\MocapViewer\MocapViewer.vcxproj" (build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:15.33

@@ -1,0 +1,30 @@
+﻿Build started 3/10/2013 3:04:42 PM.
+     1>Project "C:\Users\Thomas\Dropbox\777--Animation\MocapViewer\MocapViewer.vcxproj" on node 2 (build target(s)).
+     1>InitializeBuildStatus:
+         Creating "Release\MocapViewer.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       ClCompile:
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oi /Oy- /GL /D _MBCS /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt Animation.cpp billboarding.cpp bitmap.cpp BVHParser.cpp Frame.cpp Frame2D.cpp FreeCamera.cpp Main.cpp Node.cpp Parser2.cpp
+         Animation.cpp
+     1>Animation.cpp(62): warning C4390: ';' : empty controlled statement found; is this the intent?
+         billboarding.cpp
+         bitmap.cpp
+         BVHParser.cpp
+     1>BVHParser.cpp(7): fatal error C1083: Cannot open include file: 'boost/algorithm/string.hpp': Invalid argument
+         Frame.cpp
+         Frame2D.cpp
+         FreeCamera.cpp
+     1>c:\users\thomas\dropbox\777--animation\mocapviewer\Quaternion.h(9): warning C4005: 'PI' : macro redefinition
+                 c:\users\thomas\dropbox\777--animation\mocapviewer\FreeCamera.h(7) : see previous definition of 'PI'
+     1>c:\users\thomas\dropbox\777--animation\mocapviewer\FreeCamera.h(18): warning C4244: 'return' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\thomas\dropbox\777--animation\mocapviewer\FreeCamera.h(19): warning C4244: 'return' : conversion from 'double' to 'float', possible loss of data
+         Main.cpp
+     1>c:\users\thomas\dropbox\777--animation\mocapviewer\menu.h(282): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\thomas\dropbox\777--animation\mocapviewer\Quaternion.h(9): warning C4005: 'PI' : macro redefinition
+                 c:\users\thomas\dropbox\777--animation\mocapviewer\FreeCamera.h(7) : see previous definition of 'PI'
+         Node.cpp
+         Parser2.cpp
+     1>Done Building Project "C:\Users\Thomas\Dropbox\777--Animation\MocapViewer\MocapViewer.vcxproj" (build target(s)) -- FAILED.
+
+Build FAILED.
+
+Time Elapsed 00:00:06.84
