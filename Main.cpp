@@ -3,6 +3,7 @@
 #include <sstream>
 #include <cstring>
 #include <cctype>
+
 using namespace std;
 
 #include <gl\glut.h>
@@ -33,6 +34,7 @@ unsigned gW, gH;
 unsigned TIMER_MS = 25;// 25 milliseconds makes the display update every 24 times/second
 unsigned passed_time = 0;
 const unsigned draw_dist = 40;
+unsigned selected_stream = 0;
 
 struct Pose;
 
@@ -61,6 +63,7 @@ bool wireframe_flag = false;
 bool play = false;
 bool prevDown = false;
 bool nextDown = false;
+bool commandMode = false;
 
 TextureID checkerTex;
 
@@ -72,6 +75,7 @@ void mouse(int btn, int state, int x, int y);
 void computePos( node* n, double p[]);
 void writeBVH( const string& fileName, Animation* ani);
 void copyFrame( nodeTransform* nT, nodeTransform*& newParent, unsigned childNum = 0);
+void interpFrame(  nodeTransform* frame1, nodeTransform* frame2, nodeTransform*& newParent, unsigned childNum, float weight);
 
 void toggleFreeCamMode(){
 	FREECAM_MODE ^= true;
@@ -186,27 +190,21 @@ void drawCube(double x, double y, double z, double size){
 
 }
 
+void loadAnimation( const string& fileName, Animation*& ani ){
+
+	cout << "Loading Figure: " << fileName << "..." << endl;
+
+	//if( ani != NULL )	delete ani;
+	
+	ani = parser.getData( fileName.c_str() );
+}
+
 void myInit()
 {
-	const string aniName1 = "newIn.bvh";
-	//const string aniName1 = "Example1.bvh";
-	//const string aniName2 = "02_03.bvh";
-	const string aniName2 = "03_02.bvh";
-	cout<<"Loading Figure 1..."<<endl;
-	figure1 = parser.getData(aniName1.c_str()); 
-	cout<<"Loading Figure 2..."<<endl;
-	figure2 = parser.getData(aniName2.c_str()); 
-	cout<<"Loading Complete"<<endl;
+	loadAnimation( "newIn.bvh", figure1 );
+	loadAnimation( "03_02.bvh", figure2 );
 
 	pose = new Pose;
-
-	//splices.push_back(vec2d(0,figure1->noofFrames));
-	splices.push_back(vec2d(5,100));
-	splices.push_back(vec2d(0,figure2->numFrames));
-
-	//figure = &motionSets.front();
-
-	frame = splices[motionIndex][0]; 
 
 	cullback = true;
 	FREECAM_MODE = false;
@@ -311,13 +309,26 @@ void myInit()
 	fps = 1.0f/figure1->frameRate;
 	TIMER_MS = 1000 / fps;
 
+	/*
 	for( int i(100); i < 200; ++i){
 		nodeTransform* nT(NULL);
 		copyFrame( figure2->motionVector[ i ],  nT);
 		figure1->motionVector[ i ] = nT;
-	}
+	}*/
 
 	//writeBVH( "TomTomTest.bvh", figure1);
+
+	for( int i(0); i < 200; i += 2){
+		nodeTransform* nT(NULL);
+		interpFrame(  figure1->motionVector[ i ], figure2->motionVector[ i + 1], nT, 0, .01f);
+
+		figure1->motionVector.insert( figure1->motionVector.begin() + (i + 1), nT);
+		figure1->motionVector[i + 1]->interp = true;
+
+		//figure1->figure->startingPos
+	}
+
+	figure1->numFrames = figure1->motionVector.size();
 }
 
 void mouse(int btn, int state, int x, int y){
@@ -482,6 +493,20 @@ void myKeyboard(unsigned char key, int x, int y){
 		case 'b':
 			camera->fov--;
 			break;
+		case 'm':
+
+			commandMode = true;
+			break;
+		case 'n':
+
+			if( selected_stream >= (figure1->numJoints() -1 )){
+	
+				selected_stream = 0;
+			}else{
+		
+				selected_stream++;
+			}
+			break;
 		default:
 			break;
 	}
@@ -493,50 +518,50 @@ void drawBone(vec3d& p, vec3d& axis, double degree, double length){
 
 	double minY = 0.0f;
 	double maxY = 1.0f;
-	double minX = 0.0f;
-	double maxX = 1.0f;
-	double minZ = 0.0f;
-	double maxZ = 1.0f;
-	double plane = (maxY - minY) / 4.0f;
-	double cX = (maxX - minX) / 2.0f;
-	double cY = (maxY - minY) / 2.0f;
-	double cZ = (maxZ - minZ) / 2.0f;
+	double minX = -0.5f;
+	double maxX = 0.5f;
+	double minZ = -0.5f;
+	double maxZ = 0.5f;
+	double plane = fabs(maxY - minY) / 4.0f;
+	double cX = (fabs(maxX - minX) + minX) / 2.0f;
+	double cY = (fabs(maxY - minY) + minY) / 2.0f;
+	double cZ = (fabs(maxZ - minZ) + minZ) / 2.0f;
 
-	glTranslatef( p[0] - minX, p[1] - minY, p[2] - minZ);
+	glTranslatef( p[0], p[1], p[2]);
 	glRotatef( degree, axis[0], axis[1], axis[2]);
 	glScalef( length/10.0f, length, length/10.0f);
 
 	glBegin(GL_POLYGON);
 		glColor4f(1.f, .5f, 0.5f, .5f);
 		
-		glVertex3f( minX, plane, maxZ);
 		glVertex3f( minX, plane, minZ);
+		glVertex3f( minX, plane, maxZ);
 
-		glVertex3f( cX, maxY, cZ);
+		glVertex3f( 0, 1.0, 0);
 	glEnd();
 	glBegin(GL_POLYGON);
 		glColor4f(.5f, .5f, 1.f, .5f);
 		
-		glVertex3f( maxX, plane, maxZ);
 		glVertex3f( minX, plane, maxZ);
+		glVertex3f( maxX, plane, maxZ);
 
-		glVertex3f( cX, maxY, cZ);
+		glVertex3f( 0.0, 1.0, 0.0);
 	glEnd();
 	glBegin(GL_POLYGON);
 		glColor4f(.5f, 1.f, 1.f, .5f);
 		
-		glVertex3f( maxX, plane, minZ);
 		glVertex3f( maxX, plane, maxZ);
+		glVertex3f( maxX, plane, minZ);
 
-		glVertex3f( cX, maxY, cZ);
+		glVertex3f( 0.0, 1.0, 0.0);
 	glEnd();
 	glBegin(GL_POLYGON);
 		glColor4f(.5f, 1.f, 0.5f, .5f);
 		
-		glVertex3f( minX, plane, minZ);
 		glVertex3f( maxX, plane, minZ);
+		glVertex3f( minX, plane, minZ);
 
-		glVertex3f( cX, maxY, cZ);
+		glVertex3f( 0.0, 1.0, 0.0);
 	glEnd();
 	/////////////
 	glBegin(GL_POLYGON);
@@ -553,7 +578,7 @@ void drawBone(vec3d& p, vec3d& axis, double degree, double length){
 		
 		glVertex3f( minX, plane, minZ);
 		glVertex3f( maxX, plane, minZ);
-		glVertex3f( cX, minY, cZ);
+		glVertex3f( 0.0, 0.0, 0.0);
 
 	glEnd();
 	glBegin(GL_POLYGON);
@@ -561,23 +586,23 @@ void drawBone(vec3d& p, vec3d& axis, double degree, double length){
 
 		glVertex3f( maxX, plane, minZ);
 		glVertex3f( maxX, plane, maxZ);
-		glVertex3f( cX, minY, cY);
+		glVertex3f( 0.0, 0.0, 0.0);
 	glEnd();
 	glBegin(GL_POLYGON);
 		glColor4f(.5f, 1.f, 1.f, .5f);
 		
 		glVertex3f( maxX, plane, maxZ);
 		glVertex3f( minX, plane, maxZ);
-		glVertex3f( cX, minY, cY);
+		glVertex3f( 0.0, 0.0, 0.0);
 	glEnd();
 	glBegin(GL_POLYGON);
 		glColor4f(.5f, .5f, 1.f, .5f);
 		
 		glVertex3f( minX, plane, maxZ);
 		glVertex3f( minX, plane, minZ);
-		glVertex3f( cX, minY, cZ);
+		glVertex3f( 0.0, 0.0, 0.0);
 	glEnd();
-
+	
 	glPopMatrix();
 	
 }
@@ -634,6 +659,27 @@ void drawPose( const Pose& pose){
 	}
 }
 
+void interpFrame(  nodeTransform* frame1, nodeTransform* frame2, nodeTransform*& newParent, unsigned childNum, float weight){
+
+	nodeTransform* newNode = new nodeTransform( *frame1 );
+	newNode->parent = newParent;
+
+	newNode->R = slerp( frame1->R, frame2->R, weight);
+
+	if( newParent != NULL ){
+	
+		newParent->children[ childNum ] = newNode;
+	}else{
+	
+		newParent = newNode;
+	}
+
+	for( int i(0); i < frame1->numChildren; ++i)
+	{
+		interpFrame( frame1->children[i], frame2->children[i], newNode, i, weight);
+	}
+}
+
 void copyFrame( nodeTransform* nT, nodeTransform*& newParent, unsigned childNum){
 
 	nodeTransform* newNode = new nodeTransform( *nT );
@@ -651,52 +697,6 @@ void copyFrame( nodeTransform* nT, nodeTransform*& newParent, unsigned childNum)
 	{
 		copyFrame( nT->children[i], newNode, i);
 	}
-}
-
-void computeNewPosition( Animation* n, int frame, const vec3d& T, const Quaternion<double>& Q){
-	/*
-	for(int i(0); i < (n->noofchildren); ++i){
-
-		NODE* child = n->children[i];
-
-		//Quaternion<double> X( n->rotationsX[frame], vec3d( 1.0, 0.0, 0.0) );
-		//Quaternion<double> Y( n->rotationsY[frame], vec3d( 0.0, 1.0, 0.0) );
-		//Quaternion<double> Z( n->rotationsZ[frame], vec3d( 0.0, 0.0, 1.0) );
-
-		Quaternion<double> X( n->rotationsX[frame], vec3d( 1.0, 0.0, 0.0) );
-		Quaternion<double> Y( n->rotationsY[frame], vec3d( 0.0, 1.0, 0.0) );
-		Quaternion<double> Z( n->rotationsZ[frame], vec3d( 0.0, 0.0, 1.0) );
-
-		vec3d p( child->offset[0], child->offset[1], child->offset[2] );
-
-		Quaternion<double> R = Z*X*Y*Q;
-		
-		unsigned rot_base = ( n->DOF == 6 ) ? 3 : 0;//make sure channel offset is right
-
-		/*
-		for( int i(rot_base); i < rot_base + 3; ++i){
-
-			if( n->channels[i] == "Xrotation"){
-				R = X*Q;
-			}else if( n->channels[i] == "Yrotation"){
-				R = Y*Q;
-			}else if( n->channels[i] == "Zrotation"){
-				R = Z*Q;
-			}
-		}
-
-		rotate( R, p);
-		rotate( R, n->X);
-		rotate( R, n->Y);
-		rotate( R, n->Z);
-
-		p += T;
-		child->pos[0] = p[0];	child->pos[1] = p[1]; child->pos[2] = p[2]; 
-	
-		computeNewPosition( child, frame, p, R);
-	}
-
-	*/
 }
 
 void drawMarker( const vec3f& v1, const vec3f& v2, float alpha1, float alpha2){
@@ -729,6 +729,22 @@ void drawMarker( const vec3f& v1, const vec3f& v2, float alpha1, float alpha2){
 
 }
 
+
+void drawStreamer( Animation& ani, unsigned selected_stream){
+
+	vector< vec3f > list;
+	ani.getStreamerList( selected_stream, list);
+
+	float alpha1 = 0.99;
+	float alpha2 = 1.0;
+	for( unsigned j(1); j < list.size(); ++j)
+	{
+		drawMarker( list[j - 1], list[j], alpha1, alpha2);
+		alpha1 -= 0.01;
+		alpha2 -= 0.01;
+	}
+}
+
 void drawStreamers( Animation& ani, node* n){
 
 	for ( unsigned i(0); i < n->numChildren; ++i){
@@ -736,13 +752,13 @@ void drawStreamers( Animation& ani, node* n){
 		vector< vec3f > list;
 		ani.getStreamerList( n->children[i], list);
 
-		float alpha1 = 0.975;
+		float alpha1 = 0.99;
 		float alpha2 = 1.0;
 		for( unsigned j(1); j < list.size(); ++j)
 		{
 			drawMarker( list[j - 1], list[j], alpha1, alpha2);
-			alpha1 -= 0.025;
-			alpha2 -= 0.025;
+			alpha1 -= 0.01;
+			alpha2 -= 0.01;
 		}
 
 		drawStreamers( ani, n->children[i]);
@@ -750,30 +766,12 @@ void drawStreamers( Animation& ani, node* n){
 }
 
 void drawFigure( node* n ){
+
+	float boneLength = 0.0;
 	
 	for ( unsigned i(0); i <  (n->numChildren); ++i){
 
 		node* child = n->children[i];
-
-		//X
-		/*glBegin(GL_LINES);
-			glColor4f(1.f, 0.f, 0.f, 1.f);
-			glVertex3f( n->pos[0], n->pos[1], n->pos[2] );
-			glVertex3f( n->pos[0] + child->X[0]*3, n->pos[1] + child->X[1]*3, n->pos[2] + child->X[2]*3);
-		glEnd();
-		//Y
-		glBegin(GL_LINES);
-			glColor4f(0.f, 1.f, 0.f, .5f);
-			glVertex3f( n->pos[0], n->pos[1], n->pos[2] );
-			glVertex3f( n->pos[0] + child->Y[0]*3, n->pos[1] + child->Y[1]*3, n->pos[2] + child->Y[2]*3);
-		glEnd();
-		
-		//Z
-		glBegin(GL_LINES);
-			glColor4f(0.f, 0.f, 1.f, .5f);
-			glVertex3f( n->pos[0], n->pos[1], n->pos[2] );
-			glVertex3f( n->pos[0] + child->Z[0]*3, n->pos[1] + child->Z[1]*3, n->pos[2] + child->Z[2]*3);
-		glEnd();*/
 		
 		glPointSize(5);
 		glBegin(GL_POINTS);
@@ -802,6 +800,26 @@ void drawFigure( node* n ){
 
 		drawFigure( child );
 	}
+
+	if( (n->numChildren) == 0){
+	
+		float boneLength = ( n->pos - n->endPos ).magnitude();
+
+		vec3f bone( 0.0f, boneLength, 0.0f );
+		vec3f joint = n->endPos - n->pos;
+
+		vec3f axis = ( bone^joint).normalize();
+
+		float theta = angle( bone, joint);
+
+		drawBone( n->pos, axis, theta, boneLength );
+
+		glPointSize(5);
+		glBegin(GL_POINTS);
+			glColor4f(0.0f, 0.0f, 1.0f, 1.f);
+			glVertex3f( n->endPos[0], n->endPos[1], n->endPos[2]);
+		glEnd();
+	}
 }
 
 void update(int value) {
@@ -812,6 +830,47 @@ void update(int value) {
 		return;
 	}else{
 		glutTimerFunc(TIMER_MS, update, 0);
+	}
+	
+	unsigned w = 0;
+	string inputLine[ 30 ];
+
+	if( commandMode ){
+		
+		system("cls");
+		cout << ">>" << endl;
+
+		bool read = true;
+
+		while( read ){
+
+			string tmp;
+			cin >> tmp;
+
+			if( tmp[ tmp.length() - 1] == ';'){
+			
+				inputLine[ w++ ] = tmp.substr(0, tmp.length() - 1);
+				read = false;
+			}else{
+			
+				inputLine[ w++ ] = tmp;
+			}
+		}
+
+		if( inputLine[0] == "load" ){
+		
+			loadAnimation( inputLine[1], figure1);
+		}else if( inputLine[0] == "splice" ){
+
+			loadAnimation( inputLine[1], figure1);
+			loadAnimation( inputLine[2], figure2);
+
+			stringstream ss;
+
+			ss << inputLine;
+		}
+ 
+		commandMode = false;
 	}
 
 	PerspectiveSet(gW, gH, camera->fov);
@@ -852,7 +911,7 @@ void update(int value) {
 	glEnable( GL_TEXTURE_2D );
 	glNormal3f(0.0,1.0,0.0);
 	
-	float floor_color[4] = {1.0, 1.0, 1.0,1.0};
+	float floor_color[4] = {1.0, 1.0, 1.0, 1.0};
 	glColor4fv( floor_color);
 	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, floor_color);
 
@@ -892,13 +951,14 @@ void update(int value) {
 
 	figure1->computePos( *pose, figure1->figure->startingPos[ figure1->currentFrame ] );
 	
-	if(play){
-		figure1->addStreamers();
-	}
+	//if(play){
+	figure1->addStreamers();
+	//}
 
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	drawFigure( figure1->figure );
-	drawStreamers( *figure1, figure1->figure );
+	//drawStreamers( *figure1, figure1->figure );
+	drawStreamer( *figure1, selected_stream );
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	glPopMatrix();

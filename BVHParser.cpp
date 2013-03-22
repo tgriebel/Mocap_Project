@@ -443,7 +443,18 @@ void BVHParser::addRotation(nodeTransform* n, node* figureNode, ifstream& file, 
 	file >> y;
 	file >> z;
 
-	n->rotation		= vec3f(x,y,z);
+	vec3f rotation(x,y,z);
+
+	Quaternion<float> X( -rotation[1], vec3d( 1.0, 0.0, 0.0) );
+	Quaternion<float> Y( -rotation[2], vec3d( 0.0, 1.0, 0.0) );
+	Quaternion<float> Z( rotation[0], vec3d( 0.0, 0.0, 1.0) );
+
+	Z = Z.normalize();
+	X = X.normalize();
+	Y = Y.normalize();
+
+	n->R = Z*X*Y;
+
 	n->figureNode	= figureNode;
 	n->numChildren	= figureNode->numChildren;
 	n->children		= new nodeTransform*[ n->numChildren ];

@@ -26,6 +26,7 @@ struct node
 	vec3f pos;
 	vec3f offset;			// offset ZYX
 	vec3f endSite;
+	vec3f endPos;
 	vec3f* history;			//holds previous pos in order to draw streamers
 	vec3f* startingPos;
 
@@ -88,7 +89,8 @@ struct nodeTransform{
 		children( NULL ), 
 		figureNode( NULL ),
 		trans(),
-		rotation(),
+		interp(false),
+		//rotation(),
 		X( 1.0, 0.0, 0.0),
 		Y( 0.0, 1.0, 0.0),
 		Z( 0.0, 0.0, 1.0)
@@ -98,7 +100,7 @@ struct nodeTransform{
 		delete[] children;
 	}
 
-	nodeTransform( const nodeTransform& nT){	//copies anything pertaining to a single note and note the topology
+	nodeTransform( const nodeTransform& nT): interp(false){	//copies anything pertaining to a single note and note the topology
 	
 		parent = NULL;
 
@@ -111,6 +113,7 @@ struct nodeTransform{
 		figureNode = nT.figureNode;
 		trans = nT.trans;
 		rotation = nT.rotation;
+		R = nT.R;
 
 		X = nT.X;
 		Y = nT.Y;
@@ -122,9 +125,11 @@ struct nodeTransform{
 	unsigned numChildren; // Number of child nodes
 
 	node* figureNode;
+	bool interp;
 
 	vec3f trans; // offset ZYX
 	vec3f rotation; // Rotation of base position: XYZ
+	Quaternion< float > R;
 
 	vec3f X, Y, Z;
 };
@@ -153,7 +158,7 @@ struct marker{
 
 struct streamer{
 
-	const static unsigned maxSize = 40;
+	const static unsigned maxSize = 120;
 	unsigned size;
 	bool on;
 
@@ -225,6 +230,8 @@ public:
 		
 			destroyFrame( i );
 		}
+
+		streamers.empty();
 	}
 
 	void destroyFrame( unsigned frame ){
@@ -268,17 +275,34 @@ public:
 		}
 	}
 
+	int numJoints(){
+
+		return streamers.size();
+	}
+
+	void getStreamerList( unsigned streamerNum, vector< vec3f >& list)
+	{
+		if( streamers.size() == 0 ) return;
+
+		map< node*, streamer >::iterator it = streamers.begin();
+
+		std::advance( it, streamerNum );
+
+		marker* m = it->second.head;
+
+		while( m != NULL){
+		
+			list.push_back( m->pt );
+			m = m->prev;
+		}
+	}
+
 	void computePos( Pose& pose, vec3f& trans){
 
 		figure->offset = figure->startingPos[ currentFrame ] + trans;
+		figure->offset[2] = -figure->offset[2];
 
 		_resetPos( *figure, *motionVector[currentFrame] );
-
-		//updateRot( *figure, *motionVector[ currentFrame ], motionVector[ currentFrame ]->rotation[0], figure->offset[0], motionVector[ currentFrame ]->Z);
-		//updateRot( *figure, *motionVector[ currentFrame ], motionVector[ currentFrame ]->rotation[1], figure->offset[1], motionVector[ currentFrame ]->X);
-		//updateRot( *figure, *motionVector[ currentFrame ], motionVector[ currentFrame ]->rotation[2], figure->offset[2], motionVector[ currentFrame ]->Y);
-
-		//_computePos(pose, *figure, *motionVector[currentFrame], trans, 0);
 
 		Quaternion<float> Q( 0.0, vec3f( 0.0, 0.0, 0.0) );
 		_computePos( *figure, *motionVector[ currentFrame] , figure->offset, Q);
@@ -318,6 +342,7 @@ private:
 				workList.push_back( n->children[i] );
 			}
 
+			//TODO: fix this!!!
 			delete n;
 		}
 	}
@@ -355,26 +380,21 @@ private:
 
 	void _computePos( node& n, nodeTransform& nT, vec3f T, const Quaternion<float>& Q){
 
-		if( n.name == "rshin" ){
-		
-			cout << "har" << endl;
-		}
+/*		Quaternion<float> X( -nT.rotation[1], vec3d( 1.0, 0.0, 0.0) );
+		Quaternion<float> Y( -nT.rotation[2], vec3d( 0.0, 1.0, 0.0) );
+		Quaternion<float> Z( nT.rotation[0], vec3d( 0.0, 0.0, 1.0) );
+
+		Z = Z.normalize();
+		X = X.normalize();
+		Y = Y.normalize();
+		*/
+		Quaternion<float> R = nT.R*Q;
 
 		for(int i(0); i < (n.numChildren); ++i){
 
 			node& child = *n.children[i];
 
-			Quaternion<float> X( nT.rotation[1], vec3d( 1.0, 0.0, 0.0) );
-			Quaternion<float> Y( nT.rotation[2], vec3d( 0.0, 1.0, 0.0) );
-			Quaternion<float> Z( nT.rotation[0], vec3d( 0.0, 0.0, 1.0) );
-
-			Z = Z.normalize();
-			X = X.normalize();
-			Y = Y.normalize();
-
 			vec3d p( child.offset[0], child.offset[1], child.offset[2] );
-
-			Quaternion<float> R = Y*X*Z*Q;
 
 			rotate( R, p);
 
@@ -382,32 +402,14 @@ private:
 	
 			_computePos( *n.children[i], *nT.children[i], child.pos, R);
 		}
-	}
 
-	/*
-	void _computePos( Pose& pose, node& n, nodeTransform& nT, vec3f trans, unsigned pt_idx){
+		if( (n.numChildren) == 0){
 
-		Quaternion<double> X, Y, Z, P, Xp, Yp, Zp;
-
-		vec3f p1( n.pos );
-
-		//pose.pts.push_back( pt );
-		//pose.lines.push_back( pair<unsigned, unsigned>( pt_idx, pose.pts.size() - 1) );
-		//pose.vlines.push_back( pair< vec3f, vec3f >( trans, pt ) );
-
-		for( unsigned i(0); i < (n.numChildren); ++i){
-
-			node& child					= *n.children[i];
-			nodeTransform& transform	= *nT.children[i];
-		
-			vec3f p2( child.pos );
-			updateRot( child, transform, transform.rotation[0], p2, nT.Z);
-			updateRot( child, transform, transform.rotation[1], p2, nT.X);
-			updateRot( child, transform, transform.rotation[2], p2, nT.Y);
-
-			_computePos( pose, *n.children[i],  *nT.children[i], p2, pose.pts.size() - 1);
+			vec3d p( n.endSite[0], n.endSite[1], n.endSite[2] );
+			rotate( R, p);
+			n.endPos = p + T;
 		}
-	}*/
+	}
 };
 
 class BVHParser 
